@@ -526,6 +526,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             console.log(`Using cached visitor count due to error: ${count}`);
                         }
                     });
+                    
+                    // Remove any invalid error event listener (this is likely causing the problem)
+                    // This is a no-op if no such listener exists
+                    database.ref('activeVisitors').off('error');
                 } catch (error) {
                     console.error("Error setting up visitor counter:", error);
                     
