@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Image Generator</title>
+</head>
+<body>
+    <h1>Image Generator</h1>
+    <p>Click the button below to generate a simple logo and save it as dazey.png:</p>
+    
+    <canvas id="canvas" width="200" height="200" style="border:2px solid black;"></canvas>
+    <br><br>
+    
+    <button onclick="generateImage()">Generate and Download Image</button>
+    
+    <script>
+        // Draw the image as soon as the page loads
+        window.onload = function() {
+            drawLogo();
+        };
+        
+        // Function to draw a logo on the canvas
+        function drawLogo() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#5647ff');
+            gradient.addColorStop(0.35, '#6389ff');
+            gradient.addColorStop(0.67, '#5e33b6');
+            gradient.addColorStop(1, '#4C2574');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw white circle
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 80, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            
+            // Add text
+            ctx.fillStyle = gradient;
+            ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('DAZEY', canvas.width/2, canvas.height/2 - 15);
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('DO', canvas.width/2, canvas.height/2 + 20);
+        }
+        
+        // Function to generate and download the image
+        function generateImage() {
+            // Make sure the logo is drawn
+            drawLogo();
+            
+            // Get the canvas
+            const canvas = document.getElementById('canvas');
+            
+            // Convert canvas to data URL
+            const dataURL = canvas.toDataURL('image/png');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'dazey.png';
+            link.href = dataURL;
+            
+            // Append to document and click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show message
+            alert('Image downloaded! Please upload this file to your GitHub repository.');
+        }
+    </script>
+</body>
+</html> 
