@@ -411,11 +411,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Use navigator.sendBeacon for more reliable data sending during page unload
                     if (navigator.sendBeacon) {
                         const blob = new Blob([JSON.stringify(offlineData)], { type: 'application/json' });
-                        navigator.sendBeacon(`https://dazey-about-me-default-rtdb.firebaseio.com/activeVisitors/${visitorId}.json`, blob);
+                        navigator.sendBeacon(`${firebaseConfig.databaseURL}/activeVisitors/${visitorId}.json`, blob);
                     } else {
                         // Fallback to synchronous XHR if sendBeacon isn't available
                         const xhr = new XMLHttpRequest();
-                        xhr.open('PATCH', `https://dazey-about-me-default-rtdb.firebaseio.com/activeVisitors/${visitorId}.json`, false); // false makes it synchronous
+                        xhr.open('PATCH', `${firebaseConfig.databaseURL}/activeVisitors/${visitorId}.json`, false); // false makes it synchronous
                         xhr.setRequestHeader('Content-Type', 'application/json');
                         xhr.send(JSON.stringify(offlineData));
                     }
