@@ -9,25 +9,24 @@ package-lock.json
 .env.test.local
 .env.production.local
 
-# Configuration files
-config.js
-
-# IDE
+# IDE specific files
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
-# OS
+# OS specific files
 .DS_Store
 Thumbs.db
 .directory
 Desktop.ini
 
-# Firebase
+# Firebase specific
 .firebase/
 firebase-debug.log
 firebase-debug.*.log
 
-# Build
+# Build directories
 dist/
 build/
 
