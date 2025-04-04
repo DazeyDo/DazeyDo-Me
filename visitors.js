@@ -35,26 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 firebaseDB.src = 'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js';
                 firebaseDB.onload = () => {
                     console.log("Firebase database loaded");
-                    // Initialize Firebase after scripts are loaded
-                    const firebaseConfig = {
-                        apiKey: "AIzaSyAnwDnEW_eE_C4xsaCPKNzJseWxdn-7VJk",
-                        authDomain: "dazey-about-me.firebaseapp.com",
-                        databaseURL: "https://dazey-about-me-default-rtdb.firebaseio.com",
-                        projectId: "dazey-about-me",
-                        storageBucket: "dazey-about-me.firebasestorage.app",
-                        messagingSenderId: "179470593312",
-                        appId: "1:179470593312:web:742219ced0556e98693b45",
-                        measurementId: "G-4VYZH6N3P3"
+                    // Load config file
+                    const configScript = document.createElement('script');
+                    configScript.src = 'config.js';
+                    configScript.onload = () => {
+                        console.log("Config loaded");
+                        try {
+                            firebase.initializeApp(firebaseConfig);
+                            console.log("Firebase initialized successfully");
+                            resolve();
+                        } catch (err) {
+                            console.error("Firebase initialization error:", err);
+                            reject(err);
+                        }
                     };
-                    
-                    try {
-                        firebase.initializeApp(firebaseConfig);
-                        console.log("Firebase initialized successfully");
-                        resolve();
-                    } catch (err) {
-                        console.error("Firebase initialization error:", err);
+                    configScript.onerror = (err) => {
+                        console.error("Failed to load config:", err);
                         reject(err);
-                    }
+                    };
+                    document.head.appendChild(configScript);
                 };
                 firebaseDB.onerror = (err) => {
                     console.error("Failed to load Firebase database:", err);

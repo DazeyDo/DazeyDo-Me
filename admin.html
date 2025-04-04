@@ -232,10 +232,16 @@
         }
     </style>
     
-    <!-- Firebase App (the core Firebase SDK) -->
+    <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <!-- Firebase Database -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="config.js"></script>
+    
+    <!-- Firebase initialization -->
+    <script>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -475,7 +481,7 @@
         // Initialize Firebase
         // Updated with your Firebase project details
         const firebaseConfig = {
-            apiKey: "AIzaSyAnwDnEW_eE_C4xsaCPKNzJseWxdn-7VJk",
+            apiKey: "YOUR_NEW_API_KEY",
             authDomain: "dazey-about-me.firebaseapp.com",
             databaseURL: "https://dazey-about-me-default-rtdb.firebaseio.com", // Added based on project ID
             projectId: "dazey-about-me",
