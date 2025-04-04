@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Test</title>
+</head>
+<body>
+    <h1>Image Test</h1>
+    
+    <!-- Test with a data URI image -->
+    <h2>Test 1: Data URI Image</h2>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH4AYEBCcGIC7j2AAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAEQSURBVHja7dixCcNAEEXRH4NcuXTl0pVLVypdunTpHDgBbZhZvwfT/MABPu4OcDsDAAAAAAAAAABweU/dAaeU5t7745bv6r0/puz5dYiSECUhSkKUhCgJURKiJERJiJIQJSFKQpSEKAlREqIkREmIkhAlIUpClIQoCVESoiRESYiSECUhSkKUhKQo+a07YJeZs4i4r/i2LfX29zXP7JiZx4jY1xxFyXelaJmZW0QsXg+WvA/2XimlS0TcIuLcWjt8Kr9sCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/9AK3JQeVWzUAxAAAAABJRU5ErkJggg==" alt="Test Data URI Image">
+    
+    <!-- Test with a local image file -->
+    <h2>Test 2: Local WebP Image</h2>
+    <img src="dazey.webp" alt="Dazey Logo" style="border: 2px solid red;">
+    
+    <!-- Test with the PNG file we created -->
+    <h2>Test 3: Local PNG Image</h2>
+    <img src="dazey.png" alt="Dazey Logo PNG" style="border: 2px solid blue;">
+    
+    <!-- Create a new WebP image -->
+    <h2>Test 4: Create New WebP</h2>
+    <button onclick="createWebPFile()">Create WebP File</button>
+    
+    <script>
+        function createWebPFile() {
+            // Create a canvas element
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a simple image
+            ctx.fillStyle = 'purple';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 30px Arial';
+            ctx.fillText('DAZEY', 50, 100);
+            
+            // Convert to blob
+            canvas.toBlob(function(blob) {
+                // Create download link
+                const link = document.createElement('a');
+                link.download = 'dazey.webp';
+                link.href = URL.createObjectURL(blob);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, 'image/webp');
+        }
+    </script>
+</body>
+</html> 

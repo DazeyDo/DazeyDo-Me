@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             preloaderContent.style.textAlign = 'center';
             
             const preloaderImage = document.createElement('img');
-            preloaderImage.src = 'dazey.webp';
+            preloaderImage.src = 'dazey.png';
             preloaderImage.alt = 'Dazey Do';
             preloaderImage.className = 'preloader-image';
             preloaderImage.style.width = '120px';
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Create an absolute overlay that can't be bypassed
                 blocker.innerHTML = `
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                        <img src="dazey.webp" alt="Dazey Do" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid transparent; background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); background-origin: border-box; background-clip: content-box, border-box; margin-bottom: 15px;">
+                        <img src="dazey.png" alt="Dazey Do" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid transparent; background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); background-origin: border-box; background-clip: content-box, border-box; margin-bottom: 15px;">
                         <div style="background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; font-family: Arial, sans-serif; margin-bottom: 15px;">Site Access Restricted</div>
                         <div style="background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; font-family: Arial, sans-serif; margin-top: 20px;">This site is currently unavailable.</div>
                     </div>
@@ -662,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const message = command.message || 'The site administrator has requested that you close this tab.';
                 modal.innerHTML = `
                     <div style="background-color: #222; padding: 30px; border-radius: 10px; max-width: 500px; width: 80%;">
-                        <img src="dazey.webp" alt="Dazey Do" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid transparent; background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); background-origin: border-box; background-clip: content-box, border-box; margin-bottom: 15px;">
+                        <img src="dazey.png" alt="Dazey Do" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid transparent; background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); background-origin: border-box; background-clip: content-box, border-box; margin-bottom: 15px;">
                         <h2 style="background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; margin-bottom: 20px;">Please Close This Tab</h2>
                         <p style="margin-bottom: 25px; line-height: 1.5;">${message}</p>
                         <button id="close-tab-btn" style="background: linear-gradient(90deg, #5647ff 0%, #6389ff 35%, #5e33b6 67%, #4C2574 100%); color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Close Tab</button>
