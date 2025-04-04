@@ -1,0 +1,25 @@
+{
+  "name": "dazey-linktree",
+  "version": "1.0.0",
+  "description": "Modern Linktree for @dazeydo with pixel trail effect",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-spring/web": "^9.7.5",
+    "@react-three/drei": "^9.99.7",
+    "@react-three/fiber": "^8.15.19",
+    "firebase": "^11.6.0",
+    "framer-motion": "^12.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.161.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.4.16"
+  }
+}

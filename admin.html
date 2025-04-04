@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #ff9ed8;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .control-container {
+            display: none;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .control-card {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-title {
+            color: #ff9ed8;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .control-body {
+            margin-bottom: 15px;
+        }
+        
+        .stats-panel {
+            margin-top: 30px;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        input, button {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        input {
+            background-color: #333;
+            color: white;
+        }
+        
+        button {
+            background-color: #ff9ed8;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #ff6bcb;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #ff9ed8;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-online {
+            background-color: #4caf50;
+        }
+        
+        .status-offline {
+            background-color: #f44336;
+        }
+        
+        .log-container {
+            background-color: #1a1a1a;
+            border-radius: 5px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .log-time {
+            color: #888;
+            margin-right: 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .badge-success {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: #ff9800;
+            color: black;
+        }
+        
+        .badge-error {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            border: 1px solid #ff9ed8;
+            color: #ff9ed8;
+            padding: 5px 10px;
+            width: auto;
+            font-size: 0.9rem;
+        }
+        
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+    
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Dazey Do Admin Panel</h1>
+        
+        <!-- Login Container -->
+        <div id="loginContainer" class="login-container">
+            <input type="password" id="passwordInput" placeholder="Enter Admin Password" />
+            <p class="error-message" id="loginError"></p>
+            <button id="loginButton">Login</button>
+        </div>
+        
+        <!-- Control Container (hidden until authenticated) -->
+        <div id="controlContainer" class="control-container">
+            <button id="logoutButton" class="logout-button">Logout</button>
+            
+            <div class="control-panel">
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Force Loading Screen</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="forceLoadingToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="control-body">
+                        <p>When enabled, all visitors will be stuck on the loading screen until you disable this setting.</p>
+                        <p>Current status: <span id="loadingStatus">Not forcing loading screen</span></p>
+                    </div>
+                    <button id="updateLoadingButton">Update Setting</button>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Set Loading Duration</h3>
+                    </div>
+                    <div class="control-body">
+                        <p>Set how long the loading screen appears for normal visits (in milliseconds).</p>
+                        <input type="number" id="loadingDurationInput" min="500" max="10000" value="1500">
+                    </div>
+                    <button id="updateDurationButton">Update Duration</button>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Maintenance Mode</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="maintenanceModeToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="control-body">
+                        <p>When enabled, a maintenance banner will be shown to all visitors.</p>
+                        <p>Maintenance message:</p>
+                        <input type="text" id="maintenanceMessageInput" placeholder="Site under maintenance. Please check back later.">
+                        <div id="maintenanceDebugInfo" class="debug-info" style="font-size: 0.8rem; margin-top: 10px; padding: 5px; background-color: #333; border-radius: 3px; display: none;">
+                            <p style="margin: 0 0 5px 0;">Debugging Information:</p>
+                            <div id="maintenancePathStatus">Path Status: Unknown</div>
+                            <div id="maintenanceValueStatus">Current Value: Unknown</div>
+                        </div>
+                    </div>
+                    <button id="updateMaintenanceButton">Update Maintenance Settings</button>
+                    <button id="checkMaintenanceButton" style="background-color: #555; margin-top: 5px;">Check Status</button>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Visitor Statistics</h3>
+                    </div>
+                    <div class="stats-panel">
+                        <div class="stats-row">
+                            <span>Total Visitors:</span>
+                            <span id="totalVisitorsCount">Loading...</span>
+                        </div>
+                        <div class="stats-row">
+                            <span>Active Visitors (last 5 min):</span>
+                            <span id="activeVisitorsCount">Loading...</span>
+                        </div>
+                        <div class="stats-row">
+                            <span>Most Popular Page:</span>
+                            <span id="popularPageCount">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="visitorChart" style="height: 200px; margin-top: 20px;"></div>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Real-Time Visitor Statistics</h3>
+                    </div>
+                    <div class="control-body">
+                        <div class="stats-panel">
+                            <div class="stats-row">
+                                <span>Active Visitors (now):</span>
+                                <span id="realtimeVisitorsCount">Loading...</span>
+                            </div>
+                            <div class="stats-row">
+                                <span>Total Visits:</span>
+                                <span id="firebaseSessionsCount">Loading...</span>
+                            </div>
+                            <div class="stats-row">
+                                <span>Current Pages Being Viewed:</span>
+                                <div id="currentPagesViewed" style="margin-top: 5px; max-height: 100px; overflow-y: auto; font-size: 0.9em;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="refreshStatsButton" style="background-color: #4CAF50;">Refresh Statistics</button>
+                    <button id="resetVisitorsButton" style="background-color: #f44336; margin-top: 5px;">Reset Visitor Count</button>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Live Visitor History</h3>
+                    </div>
+                    <div class="control-body">
+                        <p>Recent visitor activity:</p>
+                        <div id="visitorHistoryPanel" style="margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 0.9em; background-color: #1a1a1a; border-radius: 5px; padding: 10px;">
+                            <div style="color: #888;">No recent visitor data</div>
+                        </div>
+                        <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Auto-refresh: </span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoRefreshToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <button id="viewVisitorHistoryButton" style="background-color: #2196F3;">View Full Visitor History</button>
+                </div>
+                
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Visitor Management</h3>
+                    </div>
+                    <div class="control-body">
+                        <p>Powerful controls to manage all active visitors:</p>
+                        <div class="warning-box" style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Warning:</strong> These actions will affect all active visitors immediately.
+                        </div>
+                    </div>
+                    <button id="forceReloadButton" style="background-color: #ff9800; margin-bottom: 5px;">Force Reload for All Visitors</button>
+                    <button id="forceCloseButton" style="background-color: #f44336; margin-bottom: 5px;">Force Close Tab for All Visitors</button>
+                    <button id="dismissCloseButton" style="background-color: #555; margin-bottom: 5px;">Dismiss Close Tab Message</button>
+                    <button id="forceLoadingButton" style="background-color: #2196f3; margin-bottom: 5px;">Force Loading Screen for All Visitors</button>
+                    <button id="disableLoadingButton" style="background-color: #4CAF50;">Disable Force Loading Screen</button>
+                </div>
+                
+                <!-- Countdown Timer Control Card -->
+                <div class="control-card">
+                    <div class="control-header">
+                        <h3 class="control-title">Timer</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="timerEnabledToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="control-body">
+                        <p>Set the countdown timer for your next stream or special event</p>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="timerLabel" style="display: block; margin-bottom: 5px;">Timer Label:</label>
+                            <input type="text" id="timerLabel" placeholder="Next Stream" style="width: 100%;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="eventTitle" style="display: block; margin-bottom: 5px;">Event Title:</label>
+                            <input type="text" id="eventTitle" placeholder="Special Stream!" style="width: 100%;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="eventDate" style="display: block; margin-bottom: 5px;">Event Date:</label>
+                            <input type="date" id="eventDate" style="width: 100%;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="eventTime" style="display: block; margin-bottom: 5px;">Event Time:</label>
+                            <input type="time" id="eventTime" style="width: 100%;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label for="completionMessage" style="display: block; margin-bottom: 5px;">Completion Message:</label>
+                            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                                <span style="margin-right: 15px;">Show message when timer ends:</span>
+                                <label class="toggle-switch" style="margin: 0;">
+                                    <input type="checkbox" id="showCompletionToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <input type="text" id="completionMessage" placeholder="Event has started! Use promo code: DAZEY25" style="width: 100%;">
+                            <small style="color: #aaa; display: block; margin-top: 5px;">This message will be shown when the timer ends</small>
+                        </div>
+                        
+                        <div class="preview-box" style="background-color: #1a1a1a; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                            <h4 style="margin-top: 0; color: #6389ff;">Preview</h4>
+                            <div class="countdown-container" style="margin: 0; transform: scale(0.85); transform-origin: center center;">
+                                <div class="countdown-header">
+                                    <i class="fas fa-clock"></i>
+                                    <span id="preview-label">Next Stream</span>
+                                </div>
+                                <div class="countdown-timer">
+                                    <div class="countdown-item">
+                                        <span id="preview-days">00</span>
+                                        <span>Days</span>
+                                    </div>
+                                    <div class="countdown-item">
+                                        <span id="preview-hours">00</span>
+                                        <span>Hours</span>
+                                    </div>
+                                    <div class="countdown-item">
+                                        <span id="preview-minutes">00</span>
+                                        <span>Min</span>
+                                    </div>
+                                    <div class="countdown-item">
+                                        <span id="preview-seconds">00</span>
+                                        <span>Sec</span>
+                                    </div>
+                                </div>
+                                <div id="preview-date-display" class="countdown-date-display">Saturday, June 15, 2024 at 8:00 PM</div>
+                                <div class="countdown-title" id="preview-title">Special Stream!</div>
+                                <div class="countdown-completion" id="preview-completion" style="display: none;">Event has started! Use promo code: DAZEY25</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="updateTimerButton">Update Countdown Timer</button>
+                </div>
+            </div>
+            
+            <div class="log-container" id="activityLog">
+                <div class="log-entry">
+                    <span class="log-time">[Waiting for activity]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Firebase
+        // Updated with your Firebase project details
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnwDnEW_eE_C4xsaCPKNzJseWxdn-7VJk",
+            authDomain: "dazey-about-me.firebaseapp.com",
+            databaseURL: "https://dazey-about-me-default-rtdb.firebaseio.com", // Added based on project ID
+            projectId: "dazey-about-me",
+            storageBucket: "dazey-about-me.firebasestorage.app",
+            messagingSenderId: "179470593312",
+            appId: "1:179470593312:web:742219ced0556e98693b45",
+            measurementId: "G-4VYZH6N3P3"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // DOM elements
+        const loginContainer = document.getElementById('loginContainer');
+        const controlContainer = document.getElementById('controlContainer');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const loginError = document.getElementById('loginError');
+        const logoutButton = document.getElementById('logoutButton');
+        const forceLoadingToggle = document.getElementById('forceLoadingToggle');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const updateLoadingButton = document.getElementById('updateLoadingButton');
+        const loadingDurationInput = document.getElementById('loadingDurationInput');
+        const updateDurationButton = document.getElementById('updateDurationButton');
+        const totalVisitorsCount = document.getElementById('totalVisitorsCount');
+        const activeVisitorsCount = document.getElementById('activeVisitorsCount');
+        const activityLog = document.getElementById('activityLog');
+        
+        // Admin password (you should change this to something secure)
+        // In a real application, you would handle authentication more securely
+        const ADMIN_PASSWORD = "dazeydoadmin2025";
+        
+        // Authentication state
+        let isAuthenticated = false;
+        
+        // Initialize the admin interface
+        function init() {
+            console.log("Initializing admin panel");
+            
+            // Authentication state
+            isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+            
+            // Setup event listeners for login/logout
+            loginButton.addEventListener('click', authenticate);
+            passwordInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') authenticate();
+            });
+            logoutButton.addEventListener('click', logout);
+            
+            // If authenticated, show admin panel and initialize components
+            if (isAuthenticated) {
+                showControlPanel();
+                fetchSiteControls();
+                checkMaintenanceStatus();
+                refreshVisitorStats();
+                updateVisitorHistory();
+                
+                // Setup event listeners for visitor management
+                const refreshStatsButton = document.getElementById('refreshStatsButton');
+                if (refreshStatsButton) {
+                    refreshStatsButton.addEventListener('click', refreshVisitorStats);
+                }
+                
+                const resetVisitorsButton = document.getElementById('resetVisitorsButton');
+                if (resetVisitorsButton) {
+                    resetVisitorsButton.addEventListener('click', resetVisitorCount);
+                }
+                
+                const viewVisitorHistoryButton = document.getElementById('viewVisitorHistoryButton');
+                if (viewVisitorHistoryButton) {
+                    viewVisitorHistoryButton.addEventListener('click', viewVisitorHistory);
+                }
+                
+                // Setup auto-refresh toggle
+                const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+                if (autoRefreshToggle) {
+                    autoRefreshToggle.addEventListener('change', function() {
+                        if (this.checked) {
+                            startAutoRefresh();
+                        } else {
+                            stopAutoRefresh();
+                        }
+                    });
+                    
+                    // Start auto-refresh if toggle is checked
+                    if (autoRefreshToggle.checked) {
+                        startAutoRefresh();
+                    }
+                }
+                
+                // Maintenance mode controls
+                const maintenanceModeToggle = document.getElementById('maintenanceModeToggle');
+                const maintenanceMessageInput = document.getElementById('maintenanceMessageInput');
+                const updateMaintenanceButton = document.getElementById('updateMaintenanceButton');
+                const checkMaintenanceButton = document.getElementById('checkMaintenanceButton');
+                
+                if (updateMaintenanceButton) {
+                    updateMaintenanceButton.addEventListener('click', updateMaintenanceMode);
+                }
+                
+                if (checkMaintenanceButton) {
+                    checkMaintenanceButton.addEventListener('click', checkMaintenanceStatus);
+                }
+                
+                // Loading screen controls
+                const updateLoadingButton = document.getElementById('updateLoadingButton');
+                const updateDurationButton = document.getElementById('updateDurationButton');
+                
+                if (updateLoadingButton) {
+                    updateLoadingButton.addEventListener('click', updateLoadingState);
+                }
+                
+                if (updateDurationButton) {
+                    updateDurationButton.addEventListener('click', updateLoadingDuration);
+                }
+                
+                // Other visitor management buttons
+                const forceReloadButton = document.getElementById('forceReloadButton');
+                const forceCloseButton = document.getElementById('forceCloseButton');
+                const dismissCloseButton = document.getElementById('dismissCloseButton');
+                const forceLoadingButton = document.getElementById('forceLoadingButton');
+                const disableLoadingButton = document.getElementById('disableLoadingButton');
+                
+                if (forceReloadButton) forceReloadButton.addEventListener('click', forceReloadAllVisitors);
+                if (forceCloseButton) forceCloseButton.addEventListener('click', forceCloseAllTabs);
+                if (dismissCloseButton) dismissCloseButton.addEventListener('click', dismissCloseTabs);
+                if (forceLoadingButton) forceLoadingButton.addEventListener('click', forceLoadingScreenAll);
+                if (disableLoadingButton) disableLoadingButton.addEventListener('click', disableForceLoading);
+                
+                // Initialize countdown timer controls
+                initCountdownControls();
+                
+                addLogEntry('Admin panel initialized', 'success');
+            } else {
+                showLoginPanel();
+            }
+        }
+        
+        // Authenticate the admin
+        function authenticate() {
+            const password = passwordInput.value;
+            
+            if (password === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                passwordInput.value = '';
+                loginError.textContent = '';
+                showControlPanel();
+                fetchSiteControls();
+                fetchVisitorStats();
+                fetchDetailedVisitorStats();
+                loadSiteSettings();
+                checkDatabaseStatus();
+                addLogEntry('Admin logged in', 'success');
+            } else {
+                loginError.textContent = 'Invalid password';
+                isAuthenticated = false;
+                sessionStorage.removeItem('adminAuthenticated');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            stopAutoRefresh();
+            isAuthenticated = false;
+            sessionStorage.removeItem('adminAuthenticated');
+            showLoginPanel();
+            addLogEntry('Admin logged out', 'warning');
+        }
+        
+        // Show the control panel, hide login
+        function showControlPanel() {
+            loginContainer.style.display = 'none';
+            controlContainer.style.display = 'block';
+        }
+        
+        // Show the login panel, hide controls
+        function showLoginPanel() {
+            loginContainer.style.display = 'flex';
+            controlContainer.style.display = 'none';
+        }
+        
+        // Fetch site control settings from Firebase
+        function fetchSiteControls() {
+            if (!isAuthenticated) return;
+            
+            // Get the current loading force state
+            database.ref('siteControls/forceLoading').once('value')
+                .then((snapshot) => {
+                    const isForceLoading = snapshot.val() || false;
+                    forceLoadingToggle.checked = isForceLoading;
+                    updateLoadingStatusDisplay(isForceLoading);
+                    addLogEntry(`Fetched force loading state: ${isForceLoading ? 'ON' : 'OFF'}`, 'info');
+                })
+                .catch((error) => {
+                    console.error("Error fetching force loading state:", error);
+                    addLogEntry(`Error fetching force loading state: ${error.message}`, 'error');
+                });
+            
+            // Get the current loading duration
+            database.ref('siteControls/loadingDuration').once('value')
+                .then((snapshot) => {
+                    const duration = snapshot.val() || 1500;
+                    loadingDurationInput.value = duration;
+                    addLogEntry(`Fetched loading duration: ${duration}ms`, 'info');
+                })
+                .catch((error) => {
+                    console.error("Error fetching loading duration:", error);
+                    addLogEntry(`Error fetching loading duration: ${error.message}`, 'error');
+                });
+        }
+        
+        // Update the force loading state
+        function updateLoadingState() {
+            if (!isAuthenticated) return;
+            
+            const isForceLoading = forceLoadingToggle.checked;
+            
+            // Ensure database reference is valid
+            if (!database) {
+                addLogEntry("Firebase database not initialized", "error");
+                return;
+            }
+            
+            // First make sure the path exists
+            database.ref('siteControls').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        addLogEntry("Creating siteControls path", "info");
+                        // Initialize if it doesn't exist
+                        return database.ref('siteControls').set({
+                            forceLoading: isForceLoading,
+                            loadingDuration: parseInt(loadingDurationInput.value) || 1500
+                        });
+                    } else {
+                        // Just update the force loading state
+                        return database.ref('siteControls/forceLoading').set(isForceLoading);
+                    }
+                })
+                .then(() => {
+                    updateLoadingStatusDisplay(isForceLoading);
+                    addLogEntry(`Updated force loading state: ${isForceLoading ? 'ON' : 'OFF'}`, 'success');
+                })
+                .catch((error) => {
+                    console.error("Error updating force loading state:", error);
+                    addLogEntry(`Error updating force loading state: ${error.message}`, 'error');
+                });
+        }
+        
+        // Update the loading screen status display
+        function updateLoadingStatusDisplay(isForceLoading) {
+            if (isForceLoading) {
+                loadingStatus.innerHTML = '<span class="status-indicator status-online"></span> Forcing loading screen for all visitors';
+            } else {
+                loadingStatus.innerHTML = '<span class="status-indicator status-offline"></span> Not forcing loading screen';
+            }
+        }
+        
+        // Update the loading duration
+        function updateLoadingDuration() {
+            if (!isAuthenticated) return;
+            
+            const duration = parseInt(loadingDurationInput.value) || 1500;
+            
+            // Validate the duration
+            if (duration < 500) {
+                addLogEntry('Loading duration must be at least 500ms', 'warning');
+                loadingDurationInput.value = 500;
+                return;
+            }
+            
+            if (duration > 10000) {
+                addLogEntry('Loading duration cannot exceed 10000ms', 'warning');
+                loadingDurationInput.value = 10000;
+                return;
+            }
+            
+            database.ref('siteControls/loadingDuration').set(duration)
+                .then(() => {
+                    addLogEntry(`Updated loading duration to ${duration}ms`, 'success');
+                })
+                .catch((error) => {
+                    console.error("Error updating loading duration:", error);
+                    addLogEntry(`Error updating loading duration: ${error.message}`, 'error');
+                });
+        }
+        
+        // Fetch visitor statistics from Firebase
+        function refreshVisitorStats() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Refreshing visitor statistics...', 'info');
+            
+            // Get online visitor count
+            database.ref('activeVisitors').orderByChild('status').equalTo('online').once('value')
+                .then((snapshot) => {
+                    const onlineVisitors = snapshot.val() || {};
+                    const onlineCount = Object.keys(onlineVisitors).length;
+                    const realtimeVisitorsCount = document.getElementById('realtimeVisitorsCount');
+                    if (realtimeVisitorsCount) {
+                        realtimeVisitorsCount.textContent = onlineCount;
+                    }
+                    
+                    // Count visitors by status
+                    return database.ref('activeVisitors').once('value');
+                })
+                .then((snapshot) => {
+                    const allVisitors = snapshot.val() || {};
+                    
+                    // Count visitors by status
+                    const statusCounts = {
+                        online: 0,
+                        idle: 0,
+                        offline: 0
+                    };
+                    
+                    // Count pages being viewed
+                    const pagesBeingViewed = {};
+                    
+                    Object.values(allVisitors).forEach(visitor => {
+                        // Increment status counter
+                        if (visitor.status) {
+                            statusCounts[visitor.status] = (statusCounts[visitor.status] || 0) + 1;
+                        }
+                        
+                        // Only add page views for online/idle visitors
+                        if ((visitor.status === 'online' || visitor.status === 'idle') && visitor.page) {
+                            pagesBeingViewed[visitor.page] = (pagesBeingViewed[visitor.page] || 0) + 1;
+                        }
+                    });
+                    
+                    // Update UI with the status breakdown
+                    const statsPanel = document.querySelector('.stats-panel');
+                    if (statsPanel) {
+                        // Create or update the status breakdown
+                        let statusBreakdown = document.getElementById('statusBreakdown');
+                        if (!statusBreakdown) {
+                            statusBreakdown = document.createElement('div');
+                            statusBreakdown.id = 'statusBreakdown';
+                            statusBreakdown.className = 'stats-row';
+                            statusBreakdown.innerHTML = '<span>Visitor Status:</span><div id="statusDetails"></div>';
+                            statsPanel.appendChild(statusBreakdown);
+                        }
+                        
+                        const statusDetails = document.getElementById('statusDetails');
+                        if (statusDetails) {
+                            statusDetails.innerHTML = `
+                                <span style="margin-right: 10px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #4CAF50; margin-right: 5px;"></span>${statusCounts.online} online</span>
+                                <span style="margin-right: 10px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #FFC107; margin-right: 5px;"></span>${statusCounts.idle} idle</span>
+                                <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #9E9E9E; margin-right: 5px;"></span>${statusCounts.offline} offline</span>
+                            `;
+                        }
+                    }
+                    
+                    // Update current pages being viewed
+                    const currentPagesElement = document.getElementById('currentPagesViewed');
+                    if (currentPagesElement) {
+                        currentPagesElement.innerHTML = '';
+                        
+                        // Create sorted list of pages by visitor count
+                        const sortedPages = Object.entries(pagesBeingViewed)
+                            .sort((a, b) => b[1] - a[1]);
+                        
+                        if (sortedPages.length === 0) {
+                            currentPagesElement.innerHTML = '<div style="color: #888;">No active page views</div>';
+                        } else {
+                            sortedPages.forEach(([page, count]) => {
+                                const pageRow = document.createElement('div');
+                                pageRow.innerHTML = `<span style="color: #4CAF50;">${count}</span> visitors on <span style="font-family: monospace;">${page || 'homepage'}</span>`;
+                                currentPagesElement.appendChild(pageRow);
+                            });
+                        }
+                    }
+                    
+                    // Find the most popular page
+                    let mostPopularPage = 'None';
+                    let maxVisits = 0;
+                    
+                    Object.entries(pagesBeingViewed).forEach(([page, count]) => {
+                        if (count > maxVisits) {
+                            mostPopularPage = page;
+                            maxVisits = count;
+                        }
+                    });
+                    
+                    const popularPageElement = document.getElementById('popularPageCount');
+                    if (popularPageElement && maxVisits > 0) {
+                        popularPageElement.textContent = mostPopularPage + ' (' + maxVisits + ' visitors)';
+                    } else if (popularPageElement) {
+                        popularPageElement.textContent = 'No active visitors';
+                    }
+                    
+                    // Update active visitors count
+                    const activeVisitorsElement = document.getElementById('activeVisitorsCount');
+                    if (activeVisitorsElement) {
+                        const activeCount = statusCounts.online + statusCounts.idle;
+                        activeVisitorsElement.textContent = activeCount;
+                    }
+                    
+                    addLogEntry(`Found ${statusCounts.online} online, ${statusCounts.idle} idle visitors`, 'success');
+                    
+                    // Update visitor history
+                    updateVisitorHistory();
+                    
+                    // Get Firebase sessions count
+                    return database.ref('sessionsCount').once('value');
+                })
+                .then((snapshot) => {
+                    const sessionsCount = snapshot.val() || 0;
+                    const firebaseSessionsCount = document.getElementById('firebaseSessionsCount');
+                    if (firebaseSessionsCount) {
+                        firebaseSessionsCount.textContent = sessionsCount;
+                    }
+                    
+                    // Get total visitors count
+                    const totalVisitorsElement = document.getElementById('totalVisitorsCount');
+                    if (totalVisitorsElement) {
+                        totalVisitorsElement.textContent = sessionsCount;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error refreshing visitor statistics:", error);
+                    addLogEntry(`Error refreshing visitor statistics: ${error.message}`, 'error');
+                });
+        }
+        
+        // Fetch more detailed visitor statistics from Firebase
+        function fetchDetailedVisitorStats() {
+            if (!isAuthenticated) return;
+            
+            // Get page visit statistics
+            database.ref('activeVisitors').once('value')
+                .then((snapshot) => {
+                    const visitors = snapshot.val() || {};
+                    
+                    // Count visitors by page
+                    const pageVisits = {};
+                    Object.values(visitors).forEach(visitor => {
+                        if (visitor.page) {
+                            pageVisits[visitor.page] = (pageVisits[visitor.page] || 0) + 1;
+                        }
+                    });
+                    
+                    // Find the most popular page
+                    let mostPopularPage = 'None';
+                    let maxVisits = 0;
+                    
+                    Object.entries(pageVisits).forEach(([page, count]) => {
+                        if (count > maxVisits) {
+                            mostPopularPage = page;
+                            maxVisits = count;
+                        }
+                    });
+                    
+                    popularPageCount.textContent = mostPopularPage + ' (' + maxVisits + ' visitors)';
+                })
+                .catch((error) => {
+                    console.error("Error fetching page statistics:", error);
+                    popularPageCount.textContent = 'Error loading';
+                });
+        }
+        
+        // Load site content, appearance, and other settings
+        function loadSiteSettings() {
+            if (!isAuthenticated) return;
+            
+            // Load maintenance mode settings
+            database.ref('siteControls/maintenanceMode').once('value')
+                .then((snapshot) => {
+                    const maintenanceSettings = snapshot.val() || { enabled: false, message: '' };
+                    maintenanceModeToggle.checked = maintenanceSettings.enabled;
+                    maintenanceMessageInput.value = maintenanceSettings.message || '';
+                })
+                .catch((error) => {
+                    console.error("Error loading maintenance settings:", error);
+                });
+        }
+        
+        // Update the maintenance mode
+        function updateMaintenanceMode() {
+            if (!isAuthenticated) return;
+            
+            const maintenanceModeToggle = document.getElementById('maintenanceModeToggle');
+            const maintenanceMessageInput = document.getElementById('maintenanceMessageInput');
+            
+            if (!maintenanceModeToggle || !maintenanceMessageInput) {
+                addLogEntry('Error: Maintenance controls not found', 'error');
+                return;
+            }
+            
+            const isMaintenanceMode = maintenanceModeToggle.checked;
+            const maintenanceMessage = maintenanceMessageInput.value.trim() || 'Site under maintenance. Please check back later.';
+            
+            addLogEntry(`Updating maintenance mode to: ${isMaintenanceMode ? 'ON' : 'OFF'}`, 'info');
+            
+            // First check if siteControls path exists
+            database.ref('siteControls').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        addLogEntry("Creating siteControls path", "info");
+                        // Initialize the path if it doesn't exist
+                        return database.ref('siteControls').set({
+                            forceLoading: false,
+                            loadingDuration: 1500,
+                            maintenanceMode: {
+                                enabled: isMaintenanceMode,
+                                message: maintenanceMessage
+                            }
+                        });
+                    } else if (!snapshot.hasChild('maintenanceMode')) {
+                        // Just add the maintenance mode settings
+                        return database.ref('siteControls/maintenanceMode').set({
+                            enabled: isMaintenanceMode,
+                            message: maintenanceMessage
+                        });
+                    } else {
+                        // Update existing maintenance mode settings
+                        return database.ref('siteControls/maintenanceMode').set({
+                            enabled: isMaintenanceMode,
+                            message: maintenanceMessage
+                        });
+                    }
+                })
+                .then(() => {
+                    // Check that the update was successful
+                    return database.ref('siteControls/maintenanceMode').once('value');
+                })
+                .then(snapshot => {
+                    const settings = snapshot.val();
+                    if (settings && settings.enabled === isMaintenanceMode) {
+                        addLogEntry(`Maintenance mode ${isMaintenanceMode ? 'enabled' : 'disabled'} successfully`, 'success');
+                        
+                        // Update UI to reflect current state
+                        const statusBadge = document.createElement('span');
+                        statusBadge.className = `badge badge-${isMaintenanceMode ? 'warning' : 'success'}`;
+                        statusBadge.textContent = isMaintenanceMode ? 'ENABLED' : 'DISABLED';
+                        
+                        // Add a visual confirmation
+                        const maintenanceTitle = document.querySelector('.control-card:nth-child(3) .control-title');
+                        if (maintenanceTitle) {
+                            // Remove any existing badge
+                            const existingBadge = maintenanceTitle.querySelector('.badge');
+                            if (existingBadge) {
+                                existingBadge.remove();
+                            }
+                            maintenanceTitle.appendChild(statusBadge);
+                        }
+                        
+                        // Display maintenance message preview
+                        const maintenancePreview = document.createElement('div');
+                        maintenancePreview.style.margin = '10px 0';
+                        maintenancePreview.style.padding = '10px';
+                        maintenancePreview.style.backgroundColor = isMaintenanceMode ? '#ffeeba' : '#c3e6cb';
+                        maintenancePreview.style.borderRadius = '5px';
+                        maintenancePreview.style.color = isMaintenanceMode ? '#856404' : '#155724';
+                        maintenancePreview.style.fontWeight = 'bold';
+                        
+                        if (isMaintenanceMode) {
+                            maintenancePreview.textContent = `Active banner: "${maintenanceMessage}"`;
+                        } else {
+                            maintenancePreview.textContent = 'Maintenance mode is disabled';
+                        }
+                        
+                        // Add preview to maintenance card
+                        const maintenanceCard = document.querySelector('.control-card:nth-child(3) .control-body');
+                        if (maintenanceCard) {
+                            // Remove any existing preview
+                            const existingPreview = maintenanceCard.querySelector('.maintenance-preview');
+                            if (existingPreview) {
+                                existingPreview.remove();
+                            }
+                            
+                            maintenancePreview.className = 'maintenance-preview';
+                            maintenanceCard.appendChild(maintenancePreview);
+                        }
+                    } else {
+                        addLogEntry('Maintenance mode update may not have been applied correctly', 'warning');
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error updating maintenance mode:", error);
+                    addLogEntry(`Error updating maintenance mode: ${error.message}`, 'error');
+                });
+        }
+        
+        // Send global notification to all visitors
+        function sendGlobalNotification() {
+            if (!isAuthenticated) return;
+            
+            const message = notificationText.value.trim();
+            if (!message) {
+                addLogEntry('Please enter a notification message', 'warning');
+                return;
+            }
+            
+            const type = notificationType.value;
+            const duration = parseInt(notificationDuration.value) || 5;
+            
+            database.ref('siteNotifications').push({
+                message: message,
+                type: type,
+                duration: duration,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            })
+            .then(() => {
+                addLogEntry(`Notification sent successfully (${type})`, 'success');
+                notificationText.value = '';
+            })
+            .catch((error) => {
+                console.error("Error sending notification:", error);
+                addLogEntry(`Error sending notification: ${error.message}`, 'error');
+            });
+        }
+        
+        // Check database status
+        function checkDatabaseStatus() {
+            if (!isAuthenticated) return;
+            
+            // Check connection status
+            const connectedRef = database.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.style.color = '#4caf50';
+                } else {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.style.color = '#f44336';
+                }
+            });
+            
+            // Check for required paths
+            const requiredPaths = ['siteControls', 'siteAppearance', 'siteContent', 'activeVisitors'];
+            let existingPaths = [];
+            
+            Promise.all(requiredPaths.map(path => 
+                database.ref(path).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            existingPaths.push(path);
+                        }
+                        return snapshot.exists();
+                    })
+                    .catch(error => {
+                        console.error(`Error checking path ${path}:`, error);
+                        return false;
+                    })
+            ))
+            .then(() => {
+                if (existingPaths.length === requiredPaths.length) {
+                    pathsStatus.textContent = 'All paths initialized';
+                    pathsStatus.style.color = '#4caf50';
+                } else {
+                    const missingPaths = requiredPaths.filter(path => !existingPaths.includes(path));
+                    pathsStatus.textContent = `Missing: ${missingPaths.join(', ')}`;
+                    pathsStatus.style.color = '#f44336';
+                }
+                
+                addLogEntry(`Database status checked: ${existingPaths.length}/${requiredPaths.length} paths found`, 'info');
+            })
+            .catch(error => {
+                console.error("Error checking database status:", error);
+                addLogEntry(`Error checking database status: ${error.message}`, 'error');
+            });
+        }
+        
+        // Initialize missing database paths
+        function initializeDatabase() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Initializing database paths...', 'info');
+            
+            // Initialize siteControls path if needed
+            database.ref('siteControls').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        return database.ref('siteControls').set({
+                            forceLoading: false,
+                            loadingDuration: 1500,
+                            maintenanceMode: {
+                                enabled: false,
+                                message: 'Site under maintenance. Please check back later.'
+                            }
+                        });
+                    }
+                    return null;
+                })
+                .then(() => {
+                    // Initialize siteAppearance path if needed
+                    return database.ref('siteAppearance').once('value');
+                })
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        return database.ref('siteAppearance').set({
+                            primaryColor: '#ff9ed8',
+                            backgroundTheme: 'default'
+                        });
+                    }
+                    return null;
+                })
+                .then(() => {
+                    // Initialize siteContent path if needed
+                    return database.ref('siteContent').once('value');
+                })
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        return database.ref('siteContent').set({
+                            headline: '',
+                            aboutText: '',
+                            featuredLink: ''
+                        });
+                    }
+                    return null;
+                })
+                .then(() => {
+                    addLogEntry('Database paths initialized successfully', 'success');
+                    // Check status again to confirm
+                    checkDatabaseStatus();
+                })
+                .catch(error => {
+                    console.error("Error initializing database:", error);
+                    addLogEntry(`Error initializing database: ${error.message}`, 'error');
+                });
+        }
+        
+        // Reset all settings to default values
+        function resetAllSettings() {
+            if (!isAuthenticated) return;
+            
+            if (!confirm("Are you sure you want to reset all settings to their default values? This cannot be undone.")) {
+                return;
+            }
+            
+            addLogEntry('Resetting all settings to default values...', 'warning');
+            
+            // Reset site controls
+            database.ref('siteControls').set({
+                forceLoading: false,
+                loadingDuration: 1500,
+                maintenanceMode: {
+                    enabled: false,
+                    message: 'Site under maintenance. Please check back later.'
+                }
+            })
+            .then(() => {
+                // Update UI to reflect changes
+                forceLoadingToggle.checked = false;
+                updateLoadingStatusDisplay(false);
+                loadingDurationInput.value = 1500;
+                maintenanceModeToggle.checked = false;
+                maintenanceMessageInput.value = 'Site under maintenance. Please check back later.';
+                
+                // Show success message
+                addLogEntry('All settings have been reset to their default values', 'success');
+                
+                // Reload settings from database
+                fetchSiteControls();
+                loadSiteSettings();
+                
+                // Send a notification to all visitors
+                return database.ref('siteNotifications').push({
+                    message: "Site settings have been reset by admin",
+                    type: "info",
+                    duration: 5,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            })
+            .catch(error => {
+                console.error("Error resetting settings:", error);
+                addLogEntry(`Error resetting settings: ${error.message}`, 'error');
+            });
+        }
+        
+        // Update visitor history panel with more detailed information
+        function updateVisitorHistory() {
+            const historyPanel = document.getElementById('visitorHistoryPanel');
+            if (!historyPanel) return;
+            
+            // Clear current content
+            historyPanel.innerHTML = '<div style="text-align: center; padding: 10px;">Loading visitor data...</div>';
+            
+            // Get the latest visitor activity data
+            database.ref('activeVisitors').orderByChild('lastActive').limitToLast(15).once('value')
+                .then(snapshot => {
+                    // Clear loading message
+                    historyPanel.innerHTML = '';
+                    
+                    const visitors = snapshot.val() || {};
+                    
+                    if (!visitors || Object.keys(visitors).length === 0) {
+                        historyPanel.innerHTML = '<div style="color: #888;">No recent visitor data</div>';
+                        return;
+                    }
+                    
+                    // Get all visitors and sort by lastActive timestamp, most recent first
+                    const visitorArray = Object.entries(visitors)
+                        .map(([id, data]) => ({ id, ...data }))
+                        .sort((a, b) => (b.lastActive || 0) - (a.lastActive || 0));
+                    
+                    // Create visitor history entries
+                    visitorArray.forEach(visitor => {
+                        const visitorRow = document.createElement('div');
+                        visitorRow.className = 'visitor-row';
+                        visitorRow.style.padding = '5px 0';
+                        visitorRow.style.borderBottom = '1px solid #333';
+                        visitorRow.style.display = 'flex';
+                        visitorRow.style.justifyContent = 'space-between';
+                        visitorRow.style.alignItems = 'center';
+                        
+                        // Calculate time ago
+                        const timeAgo = visitor.lastActive ? formatTimeAgo(visitor.lastActive) : 'unknown';
+                        
+                        // Status indicator and color
+                        let statusColor = '#9E9E9E'; // default gray
+                        let statusText = visitor.status || 'unknown';
+                        
+                        switch (visitor.status) {
+                            case 'online':
+                                statusColor = '#4CAF50'; // green
+                                break;
+                            case 'idle':
+                                statusColor = '#FFC107'; // yellow/amber
+                                break;
+                            case 'offline':
+                                statusColor = '#9E9E9E'; // gray
+                                break;
+                        }
+                        
+                        // Format device info
+                        let deviceInfo = 'Unknown device';
+                        if (visitor.userAgent) {
+                            if (visitor.userAgent.includes('Mobile') || visitor.userAgent.includes('Android') || visitor.userAgent.includes('iPhone')) {
+                                deviceInfo = 'Mobile';
+                            } else if (visitor.userAgent.includes('Tablet') || visitor.userAgent.includes('iPad')) {
+                                deviceInfo = 'Tablet';
+                            } else {
+                                deviceInfo = 'Desktop';
+                            }
+                        }
+                        
+                        // Create visitor info
+                        visitorRow.innerHTML = `
+                            <div>
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${statusColor}; margin-right: 5px;"></span>
+                                <span style="font-family: monospace; font-size: 0.85em;" title="${visitor.page || 'homepage'}">${shortenString(visitor.page || 'homepage', 20)}</span>
+                                <span style="color: #888; font-size: 0.8em; margin-left: 5px;">${deviceInfo}</span>
+                            </div>
+                            <div style="color: #888; font-size: 0.8em;">
+                                ${visitor.status === 'online' ? 'Active ' + timeAgo : statusText + ' ' + timeAgo}
+                            </div>
+                        `;
+                        
+                        // Add hover effect with more details
+                        const fullInfo = `
+                            Status: ${visitor.status || 'unknown'}
+                            Page: ${visitor.page || 'homepage'}
+                            Last active: ${visitor.lastActive ? new Date(visitor.lastActive).toLocaleString() : 'unknown'}
+                            Joined: ${visitor.joinedAt ? new Date(visitor.joinedAt).toLocaleString() : 'N/A'}
+                            ${visitor.leftAt ? 'Left: ' + new Date(visitor.leftAt).toLocaleString() : ''}
+                            Referrer: ${visitor.referrer || 'direct'}
+                            Screen: ${visitor.screenSize || 'unknown'}
+                            Language: ${visitor.language || 'unknown'}
+                        `;
+                        
+                        visitorRow.title = fullInfo;
+                        historyPanel.appendChild(visitorRow);
+                    });
+                    
+                    // Add a small update time indicator
+                    const updateInfo = document.createElement('div');
+                    updateInfo.style.fontSize = '0.7em';
+                    updateInfo.style.color = '#666';
+                    updateInfo.style.textAlign = 'right';
+                    updateInfo.style.marginTop = '5px';
+                    updateInfo.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+                    historyPanel.appendChild(updateInfo);
+                })
+                .catch(error => {
+                    console.error("Error updating visitor history:", error);
+                    historyPanel.innerHTML = `<div style="color: #f44336;">Error loading visitor data: ${error.message}</div>`;
+                });
+        }
+        
+        // Helper function to shorten strings with ellipsis
+        function shortenString(str, maxLength) {
+            if (!str) return '';
+            if (str.length <= maxLength) return str;
+            return str.substr(0, maxLength - 3) + '...';
+        }
+        
+        // Format timestamp to "time ago" format
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return 'unknown';
+            
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            if (diff < 60000) {
+                return 'just now';
+            } else if (diff < 3600000) {
+                return Math.floor(diff / 60000) + ' min ago';
+            } else if (diff < 86400000) {
+                return Math.floor(diff / 3600000) + ' hr ago';
+            } else {
+                return Math.floor(diff / 86400000) + ' days ago';
+            }
+        }
+        
+        // View full visitor history
+        function viewVisitorHistory() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Loading full visitor history...', 'info');
+            
+            // Get all visitors
+            database.ref('activeVisitors').once('value')
+                .then((snapshot) => {
+                    const visitors = snapshot.val() || {};
+                    
+                    // Create a popup to display full history
+                    const popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.top = '50%';
+                    popup.style.left = '50%';
+                    popup.style.transform = 'translate(-50%, -50%)';
+                    popup.style.backgroundColor = '#1e1e1e';
+                    popup.style.padding = '20px';
+                    popup.style.borderRadius = '10px';
+                    popup.style.zIndex = '1000';
+                    popup.style.width = '80%';
+                    popup.style.maxWidth = '800px';
+                    popup.style.maxHeight = '80vh';
+                    popup.style.overflowY = 'auto';
+                    popup.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+                    
+                    // Add header
+                    const header = document.createElement('div');
+                    header.style.display = 'flex';
+                    header.style.justifyContent = 'space-between';
+                    header.style.alignItems = 'center';
+                    header.style.marginBottom = '20px';
+                    
+                    const title = document.createElement('h3');
+                    title.textContent = 'Full Visitor History';
+                    title.style.color = '#ff9ed8';
+                    title.style.margin = '0';
+                    
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = '×';
+                    closeButton.style.backgroundColor = 'transparent';
+                    closeButton.style.border = 'none';
+                    closeButton.style.color = '#fff';
+                    closeButton.style.fontSize = '24px';
+                    closeButton.style.cursor = 'pointer';
+                    closeButton.style.width = 'auto';
+                    closeButton.style.padding = '0 10px';
+                    closeButton.onclick = () => popup.remove();
+                    
+                    header.appendChild(title);
+                    header.appendChild(closeButton);
+                    popup.appendChild(header);
+                    
+                    // Create a table for visitor data
+                    const table = document.createElement('table');
+                    table.style.width = '100%';
+                    table.style.borderCollapse = 'collapse';
+                    
+                    // Add table header
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr style="border-bottom: 1px solid #444; text-align: left;">
+                            <th style="padding: 8px; color: #ff9ed8;">Status</th>
+                            <th style="padding: 8px; color: #ff9ed8;">Page</th>
+                            <th style="padding: 8px; color: #ff9ed8;">Last Active</th>
+                            <th style="padding: 8px; color: #ff9ed8;">Joined</th>
+                            <th style="padding: 8px; color: #ff9ed8;">Left</th>
+                            <th style="padding: 8px; color: #ff9ed8;">Referrer</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    // Add table body with visitor data
+                    const tbody = document.createElement('tbody');
+                    
+                    // Sort visitors by status (online first) and then by lastActive time
+                    const visitorArray = Object.entries(visitors)
+                        .map(([id, data]) => ({ id, ...data }))
+                        .sort((a, b) => {
+                            if (a.status === 'online' && b.status !== 'online') return -1;
+                            if (a.status !== 'online' && b.status === 'online') return 1;
+                            return (b.lastActive || 0) - (a.lastActive || 0);
+                        });
+                    
+                    visitorArray.forEach(visitor => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = '1px solid #333';
+                        
+                        // Format timestamps
+                        const lastActive = visitor.lastActive ? new Date(visitor.lastActive).toLocaleString() : 'N/A';
+                        const joined = visitor.joinedAt ? new Date(visitor.joinedAt).toLocaleString() : 'N/A';
+                        const left = visitor.leftAt ? new Date(visitor.leftAt).toLocaleString() : 'N/A';
+                        
+                        // Status indicator
+                        const statusColor = visitor.status === 'online' ? '#4CAF50' : '#f44336';
+                        const statusText = visitor.status === 'online' ? 'Online' : 'Offline';
+                        
+                        tr.innerHTML = `
+                            <td style="padding: 8px;">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${statusColor}; margin-right: 5px;"></span>
+                                ${statusText}
+                            </td>
+                            <td style="padding: 8px; font-family: monospace;">${visitor.page || 'homepage'}</td>
+                            <td style="padding: 8px;">${lastActive}</td>
+                            <td style="padding: 8px;">${joined}</td>
+                            <td style="padding: 8px;">${visitor.status === 'offline' ? left : '-'}</td>
+                            <td style="padding: 8px;">${visitor.referrer || 'direct'}</td>
+                        `;
+                        
+                        tbody.appendChild(tr);
+                    });
+                    
+                    table.appendChild(tbody);
+                    popup.appendChild(table);
+                    
+                    // Add to document
+                    document.body.appendChild(popup);
+                    
+                    addLogEntry(`Loaded history for ${visitorArray.length} visitors`, 'success');
+                })
+                .catch((error) => {
+                    console.error("Error loading visitor history:", error);
+                    addLogEntry(`Error loading visitor history: ${error.message}`, 'error');
+                });
+        }
+        
+        // Reset visitor count in Firebase
+        function resetVisitorCount() {
+            if (!isAuthenticated) return;
+            
+            if (!confirm("This will reset the visitor count to zero. Are you sure you want to proceed?")) {
+                return;
+            }
+            
+            addLogEntry('Resetting visitor count...', 'warning');
+            
+            database.ref('sessionsCount').set(0)
+                .then(() => {
+                    addLogEntry('Visitor count has been reset to 0', 'success');
+                    refreshVisitorStats();
+                })
+                .catch(error => {
+                    console.error('Error resetting visitor count:', error);
+                    addLogEntry(`Error resetting visitor count: ${error.message}`, 'error');
+                });
+        }
+        
+        // Auto-refresh variables
+        let autoRefreshInterval = null;
+        const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
+        
+        // Start auto-refresh
+        function startAutoRefresh() {
+            if (!isAuthenticated) return;
+            
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(() => {
+                if (isAuthenticated) {
+                    refreshVisitorStats();
+                }
+            }, AUTO_REFRESH_INTERVAL);
+            
+            addLogEntry('Auto-refresh started (10s)', 'info');
+        }
+        
+        // Stop auto-refresh
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                addLogEntry('Auto-refresh stopped', 'info');
+            }
+        }
+        
+        // Start auto-refresh if the toggle is checked
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+                if (autoRefreshToggle && autoRefreshToggle.checked && isAuthenticated) {
+                    startAutoRefresh();
+                }
+            }, 2000); // Give a short delay after page load
+        });
+        
+        // Check maintenance mode status directly
+        function checkMaintenanceStatus() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Checking maintenance mode status...', 'info');
+            
+            const maintenanceDebugInfo = document.getElementById('maintenanceDebugInfo');
+            const maintenancePathStatus = document.getElementById('maintenancePathStatus');
+            const maintenanceValueStatus = document.getElementById('maintenanceValueStatus');
+            
+            if (maintenanceDebugInfo) {
+                maintenanceDebugInfo.style.display = 'block';
+            }
+            
+            // Check if the path exists
+            database.ref('siteControls').once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        if (maintenancePathStatus) {
+                            maintenancePathStatus.textContent = 'Path Status: siteControls path exists';
+                        }
+                        
+                        if (snapshot.hasChild('maintenanceMode')) {
+                            if (maintenancePathStatus) {
+                                maintenancePathStatus.textContent += ' and includes maintenanceMode';
+                            }
+                            
+                            // Get the current value
+                            return database.ref('siteControls/maintenanceMode').once('value');
+                        } else {
+                            if (maintenancePathStatus) {
+                                maintenancePathStatus.textContent += ' but maintenanceMode is MISSING';
+                            }
+                            if (maintenanceValueStatus) {
+                                maintenanceValueStatus.textContent = 'Current Value: Path not found';
+                            }
+                            addLogEntry('Maintenance mode path not found', 'warning');
+                            
+                            // Initialize maintenance mode with default values
+                            return database.ref('siteControls/maintenanceMode').set({
+                                enabled: false,
+                                message: 'Site under maintenance. Please check back later.'
+                            }).then(() => {
+                                addLogEntry('Created default maintenance mode settings', 'success');
+                                return database.ref('siteControls/maintenanceMode').once('value');
+                            });
+                        }
+                    } else {
+                        if (maintenancePathStatus) {
+                            maintenancePathStatus.textContent = 'Path Status: siteControls path does NOT exist';
+                        }
+                        if (maintenanceValueStatus) {
+                            maintenanceValueStatus.textContent = 'Current Value: Path not found';
+                        }
+                        addLogEntry('siteControls path not found, creating it', 'warning');
+                        
+                        // Create the siteControls path with default values
+                        return database.ref('siteControls').set({
+                            forceLoading: false,
+                            loadingDuration: 1500,
+                            maintenanceMode: {
+                                enabled: false,
+                                message: 'Site under maintenance. Please check back later.'
+                            }
+                        }).then(() => {
+                            addLogEntry('Created siteControls path with default values', 'success');
+                            return database.ref('siteControls/maintenanceMode').once('value');
+                        });
+                    }
+                })
+                .then(snapshot => {
+                    if (snapshot && snapshot.val()) {
+                        const settings = snapshot.val();
+                        if (maintenanceValueStatus) {
+                            maintenanceValueStatus.textContent = `Current Value: ${JSON.stringify(settings)}`;
+                        }
+                        
+                        // Update the toggle to match the actual state
+                        const maintenanceModeToggle = document.getElementById('maintenanceModeToggle');
+                        const maintenanceMessageInput = document.getElementById('maintenanceMessageInput');
+                        
+                        if (maintenanceModeToggle) {
+                            maintenanceModeToggle.checked = settings.enabled;
+                        }
+                        
+                        if (maintenanceMessageInput) {
+                            maintenanceMessageInput.value = settings.message || '';
+                        }
+                        
+                        // Update visual status in the UI
+                        const maintenanceTitle = document.querySelector('.control-card:nth-child(3) .control-title');
+                        if (maintenanceTitle) {
+                            // Remove any existing badge
+                            const existingBadge = maintenanceTitle.querySelector('.badge');
+                            if (existingBadge) {
+                                existingBadge.remove();
+                            }
+                            
+                            // Add a new badge
+                            const statusBadge = document.createElement('span');
+                            statusBadge.className = `badge badge-${settings.enabled ? 'warning' : 'success'}`;
+                            statusBadge.textContent = settings.enabled ? 'ENABLED' : 'DISABLED';
+                            maintenanceTitle.appendChild(statusBadge);
+                        }
+                        
+                        addLogEntry(`Maintenance mode is currently ${settings.enabled ? 'ON' : 'OFF'}`, 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking maintenance status:", error);
+                    addLogEntry(`Error checking maintenance status: ${error.message}`, 'error');
+                });
+        }
+        
+        // Function to add log entries
+        function addLogEntry(message, type = 'info') {
+            const logContainer = document.getElementById('activityLog');
+            if (!logContainer) return;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const logTime = document.createElement('span');
+            logTime.className = 'log-time';
+            logTime.textContent = `[${timeString}]`;
+            
+            const logMessage = document.createElement('span');
+            logMessage.textContent = ` ${message}`;
+            
+            if (type !== 'info') {
+                const badge = document.createElement('span');
+                badge.className = `badge badge-${type}`;
+                badge.textContent = type.toUpperCase();
+                logMessage.appendChild(badge);
+            }
+            
+            logEntry.appendChild(logTime);
+            logEntry.appendChild(logMessage);
+            
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            // Limit log entries to prevent performance issues
+            if (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+        
+        // Force reload for all visitors
+        function forceReloadAllVisitors() {
+            if (!isAuthenticated) return;
+            
+            if (!confirm("This will force all active visitors to reload their page. Continue?")) {
+                return;
+            }
+            
+            addLogEntry('Sending force reload command to all visitors...', 'warning');
+            
+            // Set the command with a timestamp
+            database.ref('siteControls/forceReload').set({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                triggered: true
+            })
+            .then(() => {
+                addLogEntry('Force reload command sent successfully', 'success');
+                
+                // Clear the command after 5 seconds to ensure it's been processed
+                setTimeout(() => {
+                    database.ref('siteControls/forceReload/triggered').set(false);
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Error sending force reload command:', error);
+                addLogEntry(`Error sending force reload command: ${error.message}`, 'error');
+            });
+        }
+        
+        // Force close tab for all visitors
+        function forceCloseAllTabs() {
+            if (!isAuthenticated) return;
+            
+            if (!confirm("This will try to force all visitors to close their browser tab. Continue?")) {
+                return;
+            }
+            
+            addLogEntry('Sending force close command to all visitors...', 'warning');
+            
+            database.ref('siteControls/forceClose').set({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                triggered: true,
+                message: 'This tab has been closed by the site administrator.'
+            })
+            .then(() => {
+                addLogEntry('Force close command sent successfully', 'success');
+                
+                // Clear the command after 5 seconds
+                setTimeout(() => {
+                    database.ref('siteControls/forceClose/triggered').set(false);
+                }, 5000);
+            })
+            .catch(error => {
+                console.error('Error sending force close command:', error);
+                addLogEntry(`Error sending force close command: ${error.message}`, 'error');
+            });
+        }
+        
+        // Dismiss close tab message
+        function dismissCloseTabs() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Dismissing close tab messages...', 'info');
+            
+            database.ref('siteControls/forceClose/triggered').set(false)
+            .then(() => {
+                addLogEntry('Close tab message dismissed for all visitors', 'success');
+            })
+            .catch(error => {
+                console.error('Error dismissing close tab message:', error);
+                addLogEntry(`Error dismissing close tab message: ${error.message}`, 'error');
+            });
+        }
+        
+        // Force loading screen for all visitors
+        function forceLoadingScreenAll() {
+            if (!isAuthenticated) return;
+            
+            if (!confirm("This will force all visitors to see only the loading screen until you disable it. Continue?")) {
+                return;
+            }
+            
+            addLogEntry('Forcing loading screen for all visitors...', 'warning');
+            
+            database.ref('siteControls/forceLoading').set(true)
+                .then(() => {
+                    updateLoadingStatusDisplay(true);
+                    forceLoadingToggle.checked = true;
+                    addLogEntry('Loading screen forced for all visitors', 'success');
+                })
+                .catch(error => {
+                    console.error('Error forcing loading screen:', error);
+                    addLogEntry(`Error forcing loading screen: ${error.message}`, 'error');
+                });
+        }
+        
+        // Disable forced loading screen
+        function disableForceLoading() {
+            if (!isAuthenticated) return;
+            
+            addLogEntry('Disabling forced loading screen...', 'info');
+            
+            database.ref('siteControls/forceLoading').set(false)
+                .then(() => {
+                    updateLoadingStatusDisplay(false);
+                    forceLoadingToggle.checked = false;
+                    addLogEntry('Forced loading screen disabled', 'success');
+                })
+                .catch(error => {
+                    console.error('Error disabling forced loading screen:', error);
+                    addLogEntry(`Error disabling forced loading screen: ${error.message}`, 'error');
+                });
+        }
+        
+        // Countdown Timer Control functionality
+        function initCountdownControls() {
+            if (!isAuthenticated) return;
+            
+            // Get DOM elements
+            const timerEnabledToggle = document.getElementById('timerEnabledToggle');
+            const timerLabel = document.getElementById('timerLabel');
+            const eventTitle = document.getElementById('eventTitle');
+            const eventDate = document.getElementById('eventDate');
+            const eventTime = document.getElementById('eventTime');
+            const showCompletionToggle = document.getElementById('showCompletionToggle');
+            const completionMessage = document.getElementById('completionMessage');
+            const updateTimerButton = document.getElementById('updateTimerButton');
+            
+            // Preview elements
+            const previewDays = document.getElementById('preview-days');
+            const previewHours = document.getElementById('preview-hours');
+            const previewMinutes = document.getElementById('preview-minutes');
+            const previewSeconds = document.getElementById('preview-seconds');
+            const previewTitle = document.getElementById('preview-title');
+            const previewLabel = document.getElementById('preview-label');
+            const previewCompletion = document.getElementById('preview-completion');
+            const previewDateDisplay = document.createElement('div');
+            previewDateDisplay.className = 'countdown-date-display';
+            
+            // Set default values (one week from now at 8 PM)
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 7);
+            defaultDate.setHours(20, 0, 0, 0);
+            
+            // Format date for input
+            const formatDateForInput = (date) => {
+                try {
+                    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+                        console.warn("Invalid date provided to formatDateForInput", date);
+                        date = new Date(); // Use current date as fallback
+                    }
+                    
+                    const year = date.getFullYear();
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const day = date.getDate().toString().padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                } catch (e) {
+                    console.error("Error formatting date:", e);
+                    // Return today's date in correct format as fallback
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                    const day = now.getDate().toString().padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+            };
+            
+            // Format time for input
+            const formatTimeForInput = (date) => {
+                try {
+                    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+                        console.warn("Invalid date provided to formatTimeForInput", date);
+                        date = new Date(); // Use current date as fallback
+                        date.setHours(20, 0, 0, 0); // Default to 8 PM
+                    }
+                    
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                } catch (e) {
+                    console.error("Error formatting time:", e);
+                    return "20:00"; // Return 8 PM as fallback
+                }
+            };
+            
+            // Load current countdown settings from Firebase
+            try {
+                database.ref('siteContent/upcomingEvent').once('value')
+                    .then(snapshot => {
+                        const data = snapshot.val() || {
+                            date: defaultDate.getTime(),
+                            title: 'Special Stream!',
+                            enabled: true
+                        };
+                        
+                        console.log("Received event data from Firebase:", data);
+                        
+                        // Set form values
+                        timerEnabledToggle.checked = !!data.enabled;
+                        eventTitle.value = data.title || 'Special Stream!';
+                        timerLabel.value = data.label || 'Next Stream';
+                        completionMessage.value = data.completionMessage || 'Event has started! Use promo code: DAZEY25';
+                        showCompletionToggle.checked = data.showCompletionMessage !== undefined ? !!data.showCompletionMessage : true;
+                        
+                        // Convert timestamp to Date object
+                        let eventDateTime;
+                        try {
+                            // Make sure we have a valid date
+                            const timestamp = parseInt(data.date);
+                            if (!isNaN(timestamp)) {
+                                eventDateTime = new Date(timestamp);
+                                
+                                // Validate the date is reasonable
+                                if (eventDateTime.getFullYear() < 2000 || eventDateTime.getFullYear() > 2100) {
+                                    throw new Error("Date appears invalid");
+                                }
+                            } else {
+                                throw new Error("Invalid timestamp");
+                            }
+                        } catch (error) {
+                            console.warn("Invalid date from Firebase, using default", error);
+                            eventDateTime = defaultDate;
+                        }
+                        
+                        // Set date and time inputs
+                        eventDate.value = formatDateForInput(eventDateTime);
+                        eventTime.value = formatTimeForInput(eventDateTime);
+                        
+                        console.log("Set date input to:", eventDate.value);
+                        console.log("Set time input to:", eventTime.value);
+                        
+                        // Update preview
+                        updatePreview();
+                    })
+                    .catch(error => {
+                        console.error("Error loading countdown settings:", error);
+                        addLogEntry(`Error loading countdown settings: ${error.message}`, 'error');
+                        
+                        // Set default values
+                        timerEnabledToggle.checked = true;
+                        eventTitle.value = 'Special Stream!';
+                        eventDate.value = formatDateForInput(defaultDate);
+                        eventTime.value = formatTimeForInput(defaultDate);
+                    });
+            } catch (e) {
+                console.warn('Firebase not initialized for countdown settings', e);
+                
+                // Set default values
+                timerEnabledToggle.checked = true;
+                eventTitle.value = 'Special Stream!';
+                eventDate.value = formatDateForInput(defaultDate);
+                eventTime.value = formatTimeForInput(defaultDate);
+            }
+            
+            // Update button click handler
+            updateTimerButton.addEventListener('click', function() {
+                saveCountdownSettings();
+            });
+            
+            // Update preview when inputs change
+            timerEnabledToggle.addEventListener('change', updatePreview);
+            eventTitle.addEventListener('input', updatePreview);
+            eventDate.addEventListener('change', updatePreview);
+            eventTime.addEventListener('change', updatePreview);
+            
+            // Function to update the preview
+            function updatePreview() {
+                // Get values from inputs
+                const title = eventTitle.value || 'Special Stream!';
+                const label = timerLabel.value || 'Next Stream';
+                const completion = completionMessage.value || 'Event has started! Use promo code: DAZEY25';
+                const isEnabled = timerEnabledToggle.checked;
+                
+                // Get date from inputs
+                let eventDateTime;
+                try {
+                    if (eventDate.value) {
+                        const dateParts = eventDate.value.split('-');
+                        let timeParts = ['20', '00']; // Default to 8:00 PM
+                        
+                        if (eventTime.value) {
+                            timeParts = eventTime.value.split(':');
+                        }
+                        
+                        eventDateTime = new Date(
+                            parseInt(dateParts[0]), // Year
+                            parseInt(dateParts[1]) - 1, // Month (0-based)
+                            parseInt(dateParts[2]), // Day
+                            parseInt(timeParts[0]), // Hour
+                            parseInt(timeParts[1])  // Minute
+                        );
+                        
+                        // Validate date
+                        if (isNaN(eventDateTime.getTime())) {
+                            throw new Error("Invalid date");
+                        }
+                    } else {
+                        // Use default date if none provided
+                        eventDateTime = defaultDate;
+                    }
+                } catch (error) {
+                    console.error("Error parsing date in preview:", error);
+                    eventDateTime = defaultDate;
+                }
+                
+                // Calculate remaining time
+                const now = new Date().getTime();
+                const distance = eventDateTime.getTime() - now;
+                
+                // Calculate days, hours, minutes, seconds
+                const days = Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24)));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Update preview elements
+                previewDays.textContent = days.toString().padStart(2, '0');
+                previewHours.textContent = hours.toString().padStart(2, '0');
+                previewMinutes.textContent = minutes.toString().padStart(2, '0');
+                previewSeconds.textContent = seconds.toString().padStart(2, '0');
+                previewTitle.textContent = title;
+                previewLabel.textContent = label;
+                previewCompletion.textContent = completion;
+                
+                // Update date display
+                const previewDateDisplay = document.getElementById('preview-date-display');
+                if (previewDateDisplay) {
+                    const options = { 
+                        weekday: 'long', 
+                        month: 'long', 
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    };
+                    previewDateDisplay.textContent = eventDateTime.toLocaleDateString('en-US', options);
+                }
+                
+                // Show or hide preview based on enabled state
+                const previewContainer = document.querySelector('.preview-box .countdown-container');
+                if (previewContainer) {
+                    if (!isEnabled) {
+                        previewContainer.classList.add('hidden');
+                    } else {
+                        previewContainer.classList.remove('hidden');
+                        
+                        // Show either the timer or completion message based on the date
+                        const previewTimer = document.querySelector('.preview-box .countdown-timer');
+                        const previewDateDisplay = document.getElementById('preview-date-display');
+                        if (distance < 0) {
+                            // Past date - show completion message if enabled
+                            if (previewTimer) previewTimer.style.display = 'none';
+                            if (previewDateDisplay) previewDateDisplay.style.display = 'none';
+                            
+                            if (showCompletionToggle.checked) {
+                                if (previewCompletion) previewCompletion.style.display = 'block';
+                                previewContainer.classList.remove('hidden');
+                            } else {
+                                if (previewCompletion) previewCompletion.style.display = 'none';
+                                previewContainer.classList.add('hidden');
+                            }
+                        } else {
+                            // Future date - show timer
+                            if (previewTimer) previewTimer.style.display = 'flex';
+                            if (previewDateDisplay) previewDateDisplay.style.display = 'block';
+                            if (previewCompletion) previewCompletion.style.display = 'none';
+                        }
+                    }
+                }
+            }
+            
+            // Function to save countdown settings to Firebase
+            function saveCountdownSettings() {
+                // Get values from inputs
+                const title = eventTitle.value || 'Special Stream!';
+                const isEnabled = timerEnabledToggle.checked;
+                
+                // Get date from inputs
+                let eventDateTime;
+                try {
+                    if (eventDate.value) {
+                        const dateParts = eventDate.value.split('-');
+                        let timeParts = ['20', '00']; // Default to 8:00 PM
+                        
+                        if (eventTime.value) {
+                            timeParts = eventTime.value.split(':');
+                        }
+                        
+                        // Create date with correct year, month (0-indexed), day, hour, minute
+                        eventDateTime = new Date(
+                            parseInt(dateParts[0]), // Year
+                            parseInt(dateParts[1]) - 1, // Month (0-based)
+                            parseInt(dateParts[2]), // Day
+                            parseInt(timeParts[0]), // Hour
+                            parseInt(timeParts[1])  // Minute
+                        );
+                        
+                        // Validate date
+                        if (isNaN(eventDateTime.getTime())) {
+                            throw new Error("Invalid date");
+                        }
+                        
+                        console.log("Created event date time:", eventDateTime.toString(), "Timestamp:", eventDateTime.getTime());
+                    } else {
+                        // Use default date if none provided
+                        eventDateTime = defaultDate;
+                    }
+                } catch (error) {
+                    console.error("Error parsing date:", error);
+                    addLogEntry(`Error parsing date: ${error.message}. Using default date.`, 'warning');
+                    eventDateTime = defaultDate;
+                }
+                
+                // Create the event data object
+                const eventData = {
+                    date: eventDateTime.getTime(),
+                    title: title,
+                    label: timerLabel.value || 'Next Stream',
+                    completionMessage: completionMessage.value || 'Event has started! Use promo code: DAZEY25',
+                    showCompletionMessage: showCompletionToggle.checked,
+                    enabled: isEnabled
+                };
+                
+                console.log("Saving event data:", eventData);
+                
+                // Save to Firebase
+                try {
+                    database.ref('siteContent/upcomingEvent').set(eventData)
+                        .then(() => {
+                            addLogEntry('Countdown timer updated successfully!', 'success');
+                            
+                            // Update preview
+                            updatePreview();
+                        })
+                        .catch(error => {
+                            console.error("Error updating countdown timer:", error);
+                            addLogEntry(`Error updating countdown timer: ${error.message}`, 'error');
+                        });
+                } catch (e) {
+                    console.error('Error updating countdown timer:', e);
+                    addLogEntry(`Error updating countdown timer: ${e.message}`, 'error');
+                }
+            }
+            
+            // Initial preview update
+            updatePreview();
+            
+            // Start preview updates every second
+            setInterval(updatePreview, 1000);
+        }
+        
+        // Initialize the admin panel when the DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html> 

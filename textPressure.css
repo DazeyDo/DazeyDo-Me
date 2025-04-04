@@ -1,0 +1,60 @@
+/* TextPressure styles */
+@font-face {
+  font-family: 'Compressa VF';
+  src: url('https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2');
+  font-style: normal;
+}
+
+.text-pressure-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.text-pressure-title {
+  font-family: 'Compressa VF', 'Poppins', sans-serif;
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+  font-weight: 100;
+  width: 100%;
+  color: var(--primary-color);
+}
+
+/* If flex=true => space out each character span */
+.text-pressure-flex {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Stroke class toggles "stroke" effect on each character */
+.text-pressure-stroke span {
+  position: relative;
+}
+
+/* The stroke layer sits behind with text-stroke */
+.text-pressure-stroke span::after {
+  content: attr(data-char);
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: transparent;
+  z-index: -1;
+  /* If you'd like to shift the stroke up/down, you can add transform here */
+  -webkit-text-stroke-width: 2px;
+  -webkit-text-stroke-color: rgba(255, 158, 216, 0.4);
+}
+
+.text-pressure-title span {
+  display: inline-block;
+  transition: font-variation-settings 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  #text-pressure-container {
+    height: 50px !important;
+  }
+} 
