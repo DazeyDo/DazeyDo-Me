@@ -490,43 +490,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Error accessing localStorage:", e);
                 }
                 
-                // Create a reference to active visitors that are currently online
-                database.ref('activeVisitors').orderByChild('status').equalTo('online').on('value', snapshot => {
-                    const activeVisitors = snapshot.val() || {};
-                    const visitorCount = Object.keys(activeVisitors).length;
-                    
-                    // Only update if count is valid (greater than 0 or we have no previous valid count)
-                    if (visitorCount > 0 || lastValidVisitorCount === 0) {
-                        displayCount(visitorCount);
-                        lastValidVisitorCount = visitorCount;
+                try {
+                    // Create a reference to active visitors that are currently online
+                    database.ref('activeVisitors').orderByChild('status').equalTo('online').on('value', snapshot => {
+                        const activeVisitors = snapshot.val() || {};
+                        const visitorCount = Object.keys(activeVisitors).length;
                         
-                        // Store this count for future reference
-                        try {
-                            localStorage.setItem('lastKnownVisitorCount', visitorCount.toString());
-                        } catch (e) {
-                            console.error("Error saving to localStorage:", e);
+                        // Only update if count is valid (greater than 0 or we have no previous valid count)
+                        if (visitorCount > 0 || lastValidVisitorCount === 0) {
+                            displayCount(visitorCount);
+                            lastValidVisitorCount = visitorCount;
+                            
+                            // Store this count for future reference
+                            try {
+                                localStorage.setItem('lastKnownVisitorCount', visitorCount.toString());
+                            } catch (e) {
+                                console.error("Error saving to localStorage:", e);
+                            }
+                            
+                            console.log(`Live visitor count updated: ${visitorCount} active visitors`);
+                        } else {
+                            // If we get a zero count but had a previous count, keep the previous count
+                            console.log(`Got zero count, using last valid count: ${lastValidVisitorCount}`);
+                            displayCount(lastValidVisitorCount);
                         }
+                    }, (error) => {
+                        // Error callback - this is the proper way to handle errors in Firebase
+                        console.error("Error with visitor counter:", error);
                         
-                        console.log(`Live visitor count updated: ${visitorCount} active visitors`);
-                    } else {
-                        // If we get a zero count but had a previous count, keep the previous count
-                        console.log(`Got zero count, using last valid count: ${lastValidVisitorCount}`);
-                        displayCount(lastValidVisitorCount);
-                    }
-                });
-                
-                // Add an error handler
-                database.ref('activeVisitors').on('error', error => {
-                    console.error("Error with visitor counter:", error);
+                        // Display the last known count from localStorage if available
+                        const cachedCount = localStorage.getItem('lastKnownVisitorCount');
+                        if (cachedCount && !isNaN(parseInt(cachedCount))) {
+                            const count = parseInt(cachedCount);
+                            displayCount(count);
+                            console.log(`Using cached visitor count due to error: ${count}`);
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error setting up visitor counter:", error);
                     
-                    // Display the last known count from localStorage if available
+                    // If we can't set up the counter, display the cached count
                     const cachedCount = localStorage.getItem('lastKnownVisitorCount');
                     if (cachedCount && !isNaN(parseInt(cachedCount))) {
                         const count = parseInt(cachedCount);
                         displayCount(count);
-                        console.log(`Using cached visitor count due to error: ${count}`);
                     }
-                });
+                }
             };
             
             // Also show total visit count for reference
