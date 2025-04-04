@@ -447,7 +447,7 @@ function initializeSocialSharing() {
             // Pinterest Share
             else if (button.classList.contains('pinterest')) {
                 const description = encodeURIComponent('Dazey Do Website');
-                const imageUrl = encodeURIComponent(window.location.origin + '/dazey.webp');
+                const imageUrl = encodeURIComponent(window.location.origin + '/dazey.png');
                 shareUrl = `https://pinterest.com/pin/create/button/?url=${pageUrl}&media=${imageUrl}&description=${description}`;
                 window.open(shareUrl, '_blank', 'width=550,height=420');
             }

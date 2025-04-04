@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the tilted card
     const tiltedCard = new TiltedCard({
         selector: '#tilted-card-container',
-        imageSrc: 'dazey.webp',
+        imageSrc: 'dazey.png',
         altText: 'Profile Image',
         captionText: '',
         containerHeight: '150px',
@@ -494,7 +494,7 @@ function initializeSocialSharing() {
             // Pinterest Share
             else if (button.classList.contains('pinterest')) {
                 const description = encodeURIComponent('Dazey Do Website');
-                const imageUrl = encodeURIComponent(window.location.origin + '/dazey.webp');
+                const imageUrl = encodeURIComponent(window.location.origin + '/dazey.png');
                 shareUrl = `https://pinterest.com/pin/create/button/?url=${pageUrl}&media=${imageUrl}&description=${description}`;
                 window.open(shareUrl, '_blank');
             }
@@ -682,7 +682,7 @@ function shareOnLinkedIn() {
 function shareOnPinterest() {
     const pageUrl = encodeURIComponent(window.location.href);
     const description = encodeURIComponent('Dazey Do Website');
-    const imageUrl = encodeURIComponent(window.location.origin + '/dazey.webp');
+    const imageUrl = encodeURIComponent(window.location.origin + '/dazey.png');
     const shareUrl = `https://pinterest.com/pin/create/button/?url=${pageUrl}&media=${imageUrl}&description=${description}`;
     
     // Track this event in Google Analytics
