@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #121212;
+            color: white;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 10px 0;
+            background-color: #ff9ed8;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff6bcb;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        h1 {
+            color: #ff9ed8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Test & Setup</h1>
+    
+    <div>
+        <h2>Connection Test</h2>
+        <button id="testConnection">Test Firebase Connection</button>
+        <div id="connectionResult" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>Initialize Database Structure</h2>
+        <button id="initDatabase">Initialize Database Structure</button>
+        <div id="initResult" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>Enable Force Loading</h2>
+        <button id="enableForceLoading">Enable Force Loading</button>
+        <button id="disableForceLoading">Disable Force Loading</button>
+        <div id="loadingResult" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>Maintenance Mode</h2>
+        <button id="enableMaintenance">Enable Maintenance Mode</button>
+        <button id="disableMaintenance">Disable Maintenance Mode</button>
+        <div id="maintenanceResult" class="result"></div>
+    </div>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="config.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Test connection
+        document.getElementById('testConnection').addEventListener('click', function() {
+            const resultEl = document.getElementById('connectionResult');
+            resultEl.textContent = "Testing connection...";
+            
+            // Check connection
+            const connectedRef = database.ref(".info/connected");
+            connectedRef.on("value", (snap) => {
+                if (snap.val() === true) {
+                    resultEl.textContent = "Connected to Firebase successfully!";
+                } else {
+                    resultEl.textContent = "Failed to connect to Firebase";
+                }
+            });
+        });
+        
+        // Initialize database structure
+        document.getElementById('initDatabase').addEventListener('click', function() {
+            const resultEl = document.getElementById('initResult');
+            resultEl.textContent = "Initializing database structure...";
+            
+            // Create necessary paths with default values
+            const updates = {};
+            
+            // siteControls
+            updates['siteControls/forceLoading'] = false;
+            updates['siteControls/loadingDuration'] = 1500;
+            updates['siteControls/maintenanceMode/enabled'] = false;
+            updates['siteControls/maintenanceMode/message'] = 'Site under maintenance. Please check back later.';
+            
+            // siteAppearance
+            updates['siteAppearance/primaryColor'] = '#ff9ed8';
+            updates['siteAppearance/backgroundTheme'] = 'default';
+            
+            // siteContent if needed
+            updates['siteContent/headline'] = '';
+            updates['siteContent/aboutText'] = '';
+            updates['siteContent/featuredLink'] = '';
+            
+            // Initialize countdown/upcomingEvent if it doesn't exist
+            const oneWeekFromNow = new Date();
+            oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+            oneWeekFromNow.setHours(20, 0, 0, 0);
+            
+            updates['siteContent/upcomingEvent/enabled'] = true;
+            updates['siteContent/upcomingEvent/title'] = 'Special Stream!';
+            updates['siteContent/upcomingEvent/label'] = 'Next Stream';
+            updates['siteContent/upcomingEvent/date'] = oneWeekFromNow.getTime();
+            updates['siteContent/upcomingEvent/completionMessage'] = 'Event has started! Use promo code: DAZEY25';
+            updates['siteContent/upcomingEvent/showCompletionMessage'] = true;
+            
+            // Set up visitors counter if it doesn't exist
+            database.ref('sessionsCount').once('value', snapshot => {
+                if (!snapshot.exists()) {
+                    updates['sessionsCount'] = 0;
+                }
+                
+                // Make the updates
+                database.ref().update(updates)
+                    .then(() => {
+                        resultEl.textContent = "Database structure initialized successfully!";
+                    })
+                    .catch((error) => {
+                        resultEl.textContent = "Error initializing database: " + error.message;
+                    });
+            });
+        });
+        
+        // Enable force loading
+        document.getElementById('enableForceLoading').addEventListener('click', function() {
+            const resultEl = document.getElementById('loadingResult');
+            resultEl.textContent = "Enabling force loading...";
+            
+            database.ref('siteControls/forceLoading').set(true)
+                .then(() => {
+                    resultEl.textContent = "Force loading enabled successfully!";
+                })
+                .catch((error) => {
+                    resultEl.textContent = "Error enabling force loading: " + error.message;
+                });
+        });
+        
+        // Disable force loading
+        document.getElementById('disableForceLoading').addEventListener('click', function() {
+            const resultEl = document.getElementById('loadingResult');
+            resultEl.textContent = "Disabling force loading...";
+            
+            database.ref('siteControls/forceLoading').set(false)
+                .then(() => {
+                    resultEl.textContent = "Force loading disabled successfully!";
+                })
+                .catch((error) => {
+                    resultEl.textContent = "Error disabling force loading: " + error.message;
+                });
+        });
+        
+        // Enable maintenance mode
+        document.getElementById('enableMaintenance').addEventListener('click', function() {
+            const resultEl = document.getElementById('maintenanceResult');
+            resultEl.textContent = "Enabling maintenance mode...";
+            
+            database.ref('siteControls/maintenanceMode').set({
+                enabled: true,
+                message: 'Site under maintenance. Please check back later.'
+            })
+                .then(() => {
+                    resultEl.textContent = "Maintenance mode enabled successfully!";
+                })
+                .catch((error) => {
+                    resultEl.textContent = "Error enabling maintenance mode: " + error.message;
+                });
+        });
+        
+        // Disable maintenance mode
+        document.getElementById('disableMaintenance').addEventListener('click', function() {
+            const resultEl = document.getElementById('maintenanceResult');
+            resultEl.textContent = "Disabling maintenance mode...";
+            
+            database.ref('siteControls/maintenanceMode').set({
+                enabled: false,
+                message: 'Site under maintenance. Please check back later.'
+            })
+                .then(() => {
+                    resultEl.textContent = "Maintenance mode disabled successfully!";
+                })
+                .catch((error) => {
+                    resultEl.textContent = "Error disabling maintenance mode: " + error.message;
+                });
+        });
+    </script>
+</body>
+</html> 
