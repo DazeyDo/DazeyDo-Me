@@ -62,7 +62,7 @@ const App = () => {
             <div className="nsfw-tag">NSFW 18+</div>
           </a>
           
-          <a href="https://www.instagram.com/dazey.do?igsh=MWZwN2N1M3drb25qOQ%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="link-card instagram">
+          <a href="https://www.instagram.com/doitlikedazey/" target="_blank" rel="noopener noreferrer" className="link-card instagram">
             <i className="fab fa-instagram"></i>
             <span>Instagram 📸</span>
           </a>
